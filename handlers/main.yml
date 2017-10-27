@@ -1,4 +1,4 @@
 ---
 # handlers file for jetty
 - name: restart_jetty
-  service: name=jetty state=restarted
+  service: name=jetty state=restarted 
