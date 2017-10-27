@@ -1,0 +1,74 @@
+---
+# tasks file for jetty
+#Update and upgrade apt source
+- name: To update all packages
+  apt:
+    update_cache: yes
+
+- name: To upgrade all packages
+  apt:
+    upgrade: yes
+
+# To download and unarchive jetty
+- name: To download and unarchive jetty
+  unarchive:
+    src: http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.7.v20170914/jetty-distribution-9.4.7.v20170914.tar.gz
+    dest: "{{ jetty_dir }}"
+    remote_src: True
+
+#Create a group for jetty
+- name: Create Group
+  group:
+    name: "{{ jetty_group_name }}"
+    state: present
+    system: yes
+  when: jetty_group_create
+
+#Create user for jetty
+- name: Create user
+  user:
+    name: "{{ jetty_user_name }}"
+    state: present
+    comment: 'Jetty Web Server'
+    createhome: no
+    group: "{{ jetty_group_name }}"
+    system: yes
+  when: jetty_user_create
+
+- name: To rename jett folder
+  shell: mv /opt/jetty-distribution-9.4.7.v20170914/ /opt/jetty
+
+- name: To create symlink
+  file:
+    src: /opt/jetty/bin/jetty.sh
+    dest: /etc/init.d/jetty
+    state: link
+  tags:
+    - lel
+
+- name: To set webapps
+  shell: cp -rvf /opt/jetty/demo-base/webapps /opt/jetty/
+
+- name: To copy jetty file
+  template:
+    src: jetty-debian.j2
+    dest: /etc/default/jetty
+
+- name: To chnage ownership and add script
+  block:
+    - command: chown -R jetty:jetty /opt/jetty
+    - command: sudo update-rc.d jetty defaults
+
+# - name: To reload daemon
+ #  systemd: daemon_reload=yes
+
+- name: To change ownership
+  file:
+    dest: /var/run/jetty/
+    owner: jetty
+    group: jetty
+    state: directory
+    mode: 0777
+    recurse: yes
+  notify:
+    - restart_jetty

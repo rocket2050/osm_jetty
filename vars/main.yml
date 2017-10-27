@@ -1,0 +1,17 @@
+---
+# vars file for jetty
+#jetty destination directory
+jetty_dir: /opt
+
+#Group name for jetty
+jetty_group_name: jetty
+
+#Username for jetty
+jetty_user_name: jetty
+
+#Home for jetty
+#jetty_user_dir: /var/jetty
+
+jetty_group_create: True
+
+jetty_user_create: True
